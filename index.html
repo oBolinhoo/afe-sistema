@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>AFE Sistema</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Inter&display=swap');
+
+body{
+margin:0;
+font-family:'Inter';
+background:radial-gradient(circle at top,#5a0000,#0d0000);
+color:#eee;
+}
+
+/* HEADER */
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px 30px;
+background:rgba(0,0,0,0.6);
+backdrop-filter:blur(10px);
+border-bottom:1px solid rgba(212,175,55,0.3);
+}
+
+.logo{
+font-family:'Cinzel';
+font-size:26px;
+color:#d4af37;
+letter-spacing:2px;
+}
+
+/* LOGIN */
+.center{
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.login-box{
+background:rgba(0,0,0,0.8);
+padding:40px;
+border-radius:20px;
+box-shadow:0 0 40px rgba(0,0,0,0.8);
+text-align:center;
+width:320px;
+}
+
+input,textarea,select{
+width:100%;
+padding:10px;
+margin:6px 0;
+border:none;
+border-radius:10px;
+background:rgba(255,255,255,0.05);
+color:white;
+outline:none;
+}
+
+input:focus,textarea:focus{
+box-shadow:0 0 10px rgba(212,175,55,0.4);
+}
+
+button{
+padding:10px;
+width:100%;
+background:#d4af37;
+border:none;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+}
+
+/* LAYOUT */
+.container{
+padding:20px;
+max-width:1400px;
+margin:auto;
+}
+
+.tabs{
+display:flex;
+gap:10px;
+margin-bottom:15px;
+}
+
+.tab{
+padding:10px 20px;
+background:rgba(255,255,255,0.05);
+cursor:pointer;
+border-radius:10px;
+transition:0.2s;
+}
+
+.tab.active{
+background:#d4af37;
+color:black;
+}
+
+.card{
+background:rgba(0,0,0,0.5);
+backdrop-filter:blur(10px);
+padding:20px;
+border-radius:15px;
+margin-bottom:15px;
+box-shadow:0 0 20px rgba(0,0,0,0.6);
+}
+
+/* GRID */
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+gap:12px;
+}
+
+/* PERICIAS */
+.pericia{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:5px 10px;
+background:rgba(255,255,255,0.03);
+border-radius:8px;
+font-size:14px;
+}
+
+/* GRAFICO */
+canvas{
+display:block;
+margin:20px auto;
+width:420px;
+height:420px;
+}
+
+/* EVENTOS */
+.event{
+border-left:4px solid #d4af37;
+padding-left:10px;
+margin-bottom:10px;
+}
+
+/* FOCO (VIDA) */
+.foco-bar{
+width:100%;
+height:25px;
+background:rgba(255,255,255,0.1);
+border-radius:20px;
+overflow:hidden;
+margin-top:10px;
+}
+
+.foco-fill{
+height:100%;
+background:linear-gradient(90deg,#d4af37,#ffd700);
+width:50%;
+transition:width 0.3s ease;
+}
+
+/* ANIMAÇÃO */
+.fade{
+animation:fadeIn 0.4s ease;
+}
+@keyframes fadeIn{
+from{opacity:0; transform:translateY(10px);}
+to{opacity:1; transform:translateY(0);}
+}
+</style>
+</head>
+
+<body>
+
+<audio id="bgAudio" loop>
+<source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_115b9bde5d.mp3" type="audio/mp3">
+</audio>
+
+<div id="loginScreen" class="center">
+<div class="login-box">
+<h1 style="font-family:Cinzel;color:#d4af37;">AFE</h1>
+<input id="user" placeholder="Login">
+<input id="pass" placeholder="Senha">
+<button onclick="login()">Entrar</button>
+</div>
+</div>
+
+<div id="app" style="display:none">
+
+<div class="header">
+<div class="logo">Academia Federal Éden</div>
+<div id="welcome"></div>
+</div>
+
+<div class="container">
+
+<select id="userSelect" onchange="loadUser()" style="display:none"></select>
+
+<div class="tabs">
+<div class="tab active" onclick="openTab('status')">Status</div>
+<div class="tab" onclick="openTab('academico')">Acadêmico</div>
+<div class="tab" onclick="openTab('social')">Social</div>
+<div class="tab" onclick="openTab('eventos')">Eventos</div>
+</div>
+
+<div id="status" class="tabContent fade">
+
+<div class="card">
+Nome <input id="nome">
+Idade <input id="idade">
+Sala <input id="sala">
+Matrícula: <b id="matricula"></b>
+
+<h3>Foco</h3>
+Atual <input id="focoAtual" type="number">
+Máximo <input id="focoMax" type="number">
+
+<div class="foco-bar">
+<div class="foco-fill" id="focoFill"></div>
+</div>
+
+</div>
+
+<div class="card">
+<h3>Atributos</h3>
+
+<div class="grid">
+Coordenação <input id="coord">
+Físico <input id="fisico">
+Influência <input id="infl">
+Intelecto <input id="inte">
+Percepção <input id="perc">
+</div>
+
+<canvas id="grafico" width="500" height="500"></canvas>
+</div>
+
+</div>
+
+<div id="academico" class="tabContent" style="display:none">
+<div class="card">
+Matérias <textarea id="materias"></textarea>
+Admissão <select id="adm">
+<option>Carta de Recomendação</option>
+<option>Destaque Acadêmico</option>
+<option>Destaque Cultural</option>
+<option>Destaque Esportivo</option>
+</select>
+</div>
+
+<div class="card">
+<h3>Perícias</h3>
+<div id="pericias" class="grid"></div>
+</div>
+</div>
+
+<div id="social" class="tabContent" style="display:none">
+<div class="card">
+Pontos <input id="pontos">
+Inventário <textarea id="inv"></textarea>
+</div>
+</div>
+
+<div id="eventos" class="tabContent" style="display:none">
+<div id="eventoForm" style="display:none">
+<input id="eventoTitulo" placeholder="Título">
+<textarea id="eventoDesc"></textarea>
+<button onclick="addEvento()">Criar Evento</button>
+</div>
+<div id="listaEventos"></div>
+</div>
+
+</div>
+</div>
+
+<script>
+
+const users={
+diretoria:{pass:"eden123",matricula:"0001"},
+henrique:{pass:"123",matricula:"1001"},
+gabriel:{pass:"123",matricula:"1002"},
+gustavo:{pass:"123",matricula:"1003"},
+ian:{pass:"123",matricula:"1004"}
+};
+
+let currentUser, viewingUser;
+
+const periciasList=["Artes Marciais","Ciências Humanas","Ciências Naturais","Destreza","Diplomacia","Enganação","Esportiva","Força","Intimidação","Linguagem","Língua Estrangeira","Literatura","Lógica","Matemática","Observação","Performance","Tecnologia","Vigor"];
+
+function login(){
+if(users[user.value]&&users[user.value].pass===pass.value){
+
+bgAudio.play();
+
+currentUser=user.value;
+viewingUser=user.value;
+
+loginScreen.style.display="none";
+app.style.display="block";
+
+welcome.innerText=currentUser;
+
+if(currentUser==="diretoria"){
+userSelect.style.display="block";
+eventoForm.style.display="block";
+for(let k in users){
+let o=document.createElement("option");
+o.value=k;
+o.text=k;
+userSelect.appendChild(o);
+}
+}
+
+initPericias();
+loadUser();
+loadEventos();
+}
+}
+
+function openTab(id){
+document.querySelectorAll(".tabContent").forEach(t=>t.style.display="none");
+document.getElementById(id).style.display="block";
+
+document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+event.target.classList.add("active");
+}
+
+function initPericias(){
+pericias.innerHTML="";
+periciasList.forEach(p=>{
+let d=document.createElement("div");
+d.className="pericia";
+d.innerHTML="<span>"+p+"</span><input id='p_"+p+"' type='number' min='0' max='3'>";
+pericias.appendChild(d);
+});
+}
+
+function updateFoco(){
+let atual=+focoAtual.value||0;
+let max=+focoMax.value||1;
+
+let percent=(atual/max)*100;
+focoFill.style.width=Math.min(percent,100)+"%";
+}
+
+function save(){
+let data={
+nome:nome.value,
+idade:idade.value,
+sala:sala.value,
+coord:+coord.value||0,
+fisico:+fisico.value||0,
+infl:+infl.value||0,
+inte:+inte.value||0,
+perc:+perc.value||0,
+focoAtual:+focoAtual.value||0,
+focoMax:+focoMax.value||0,
+materias:materias.value,
+adm:adm.value,
+pontos:pontos.value,
+inv:inv.value,
+pericias:{}
+};
+
+periciasList.forEach(p=>{
+data.pericias[p]=document.getElementById("p_"+p).value;
+});
+
+localStorage.setItem("afe_"+viewingUser,JSON.stringify(data));
+animateGraph();
+updateFoco();
+}
+
+function loadUser(){
+viewingUser=currentUser==="diretoria"?userSelect.value:currentUser;
+
+matricula.innerText=users[viewingUser].matricula;
+
+let d=JSON.parse(localStorage.getItem("afe_"+viewingUser)||"{}");
+
+nome.value=d.nome||"";
+idade.value=d.idade||"";
+sala.value=d.sala||"";
+
+coord.value=d.coord||0;
+fisico.value=d.fisico||0;
+infl.value=d.infl||0;
+inte.value=d.inte||0;
+perc.value=d.perc||0;
+
+focoAtual.value=d.focoAtual||0;
+focoMax.value=d.focoMax||10;
+
+materias.value=d.materias||"";
+adm.value=d.adm||"Carta de Recomendação";
+pontos.value=d.pontos||"";
+inv.value=d.inv||"";
+
+periciasList.forEach(p=>{
+document.getElementById("p_"+p).value=(d.pericias||{})[p]||0;
+});
+
+animateGraph();
+updateFoco();
+}
+
+document.addEventListener("input",save);
+
+function animateGraph(){
+let ctx=grafico.getContext("2d");
+let vals=[coord.value,fisico.value,infl.value,inte.value,perc.value];
+
+let progress=0;
+
+function draw(){
+ctx.clearRect(0,0,500,500);
+
+ctx.beginPath();
+
+for(let i=0;i<5;i++){
+let ang=(Math.PI*2/5)*i - Math.PI/2;
+let r=(vals[i]*20)*progress;
+let x=250+Math.cos(ang)*r;
+let y=250+Math.sin(ang)*r;
+
+if(i===0) ctx.moveTo(x,y);
+else ctx.lineTo(x,y);
+}
+
+ctx.closePath();
+ctx.fillStyle="rgba(212,175,55,0.7)";
+ctx.fill();
+
+progress+=0.05;
+if(progress<=1) requestAnimationFrame(draw);
+}
+
+draw();
+}
+
+/* EVENTOS */
+function addEvento(){
+let eventos=JSON.parse(localStorage.getItem("eventos")||"[]");
+
+eventos.push({titulo:eventoTitulo.value,desc:eventoDesc.value});
+
+localStorage.setItem("eventos",JSON.stringify(eventos));
+loadEventos();
+}
+
+function loadEventos(){
+let eventos=JSON.parse(localStorage.getItem("eventos")||"[]");
+listaEventos.innerHTML="";
+
+eventos.forEach(e=>{
+let div=document.createElement("div");
+div.className="event fade";
+div.innerHTML="<b>"+e.titulo+"</b><br>"+e.desc;
+listaEventos.appendChild(div);
+});
+}
+
+</script>
+
+</body>
+</html>

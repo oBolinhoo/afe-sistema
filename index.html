@@ -831,6 +831,1403 @@ if(e.target.closest("#invLista")){
 updateCarga();
 }
 });
+
+/* =========================================
+AFE PATCH 2.0 - SISTEMA AVANÇADO
+========================================= */
+
+/* ========= CONTATOS MELHORADOS ========= */
+function melhorarContatos(){
+
+if(!document.getElementById("contatos")) return;
+
+let container = contatos.parentNode;
+
+if(!document.getElementById("bloqueados")){
+let div = document.createElement("div");
+div.innerHTML="<h4>Bloqueados</h4><div id='bloqueados'></div>";
+container.appendChild(div);
+}
+
+window.addContato = function(nome="",numero=""){
+let div = document.createElement("div");
+div.style.display="flex";
+div.style.gap="5px";
+div.style.marginBottom="5px";
+
+div.innerHTML=`
+<input value="${nome}" placeholder="Nome">
+<input value="${numero}" placeholder="Número">
+<button onclick="bloquearContato(this)">Bloquear</button>
+<button class="miniX" onclick="this.parentNode.remove()">x</button>
+`;
+
+contatos.appendChild(div);
+}
+
+window.bloquearContato = function(btn){
+let el = btn.parentNode;
+
+el.style.opacity="0.4";
+bloqueados.appendChild(el);
+}
+}
+
+/* ========= LOGIN REDESIGN ========= */
+function melhorarLogin(){
+
+let box = document.querySelector(".login-box");
+if(!box) return;
+
+box.style.border="1px solid rgba(212,175,55,0.3)";
+box.style.boxShadow="0 0 50px rgba(212,175,55,0.2)";
+box.style.background="linear-gradient(180deg,rgba(0,0,0,0.9),rgba(20,0,0,0.9))";
+
+let title = box.querySelector("h1");
+title.innerHTML="◈ AFE ◈";
+title.style.letterSpacing="4px";
+}
+
+/* ========= MATÉRIAS SISTEMA ========= */
+function sistemaMaterias(){
+
+if(!document.getElementById("materias")) return;
+
+let container = materias.parentNode;
+
+container.innerHTML=`
+<h3>Matérias Inscritas</h3>
+
+<div id="materiasFixas">
+✔ Ciências Humanas<br>
+✔ Ciências da Natureza<br>
+✔ Língua Portuguesa<br>
+✔ Matemática
+</div>
+
+<h4>Optativas</h4>
+<div id="materiasOpt"></div>
+`;
+
+const lista=[
+"Artes","Alemão","Árabe","Atualidades","Espanhol",
+"Estratégia","Francês","Inglês","Italiano","Japonês",
+"Mandarim","Negócios","Russo","Saúde","Tecnologia"
+];
+
+lista.forEach(m=>{
+let d=document.createElement("div");
+d.innerHTML=`
+<label>
+<input type="checkbox" onchange="save()"> ${m}
+</label>
+`;
+materiasOpt.appendChild(d);
+});
+}
+
+/* ========= GRAFICO ESTILIZADO ========= */
+function melhorarGrafico(){
+
+let ctx = grafico.getContext("2d");
+
+ctx.clearRect(0,0,500,500);
+
+/* grade */
+for(let r=20;r<=100;r+=20){
+ctx.beginPath();
+ctx.strokeStyle="rgba(212,175,55,0.15)";
+ctx.arc(250,250,r,0,Math.PI*2);
+ctx.stroke();
+}
+
+/* limite 5 */
+ctx.beginPath();
+ctx.strokeStyle="gold";
+ctx.lineWidth=2;
+
+for(let i=0;i<5;i++){
+let ang=(Math.PI*2/5)*i - Math.PI/2;
+let x=250+Math.cos(ang)*100;
+let y=250+Math.sin(ang)*100;
+
+if(i===0) ctx.moveTo(x,y);
+else ctx.lineTo(x,y);
+}
+ctx.closePath();
+ctx.stroke();
+}
+
+/* ========= EVENTOS ========= */
+function melhorarEventos(){
+
+const oldLoadEventos = loadEventos;
+
+loadEventos = function(){
+oldLoadEventos();
+
+document.querySelectorAll(".event").forEach((e,i)=>{
+
+/* marcar como lido */
+let btn=document.createElement("button");
+btn.innerText="Lido";
+btn.style.fontSize="10px";
+
+btn.onclick=()=>{
+e.style.opacity="0.4";
+listaEventos.appendChild(e);
+};
+
+e.appendChild(btn);
+
+/* deletar (diretoria) */
+if(currentUser==="diretoria"){
+let del=document.createElement("button");
+del.innerText="X";
+del.style.fontSize="10px";
+
+del.onclick=()=>{
+let eventos=JSON.parse(localStorage.getItem("eventos")||"[]");
+eventos.splice(i,1);
+localStorage.setItem("eventos",JSON.stringify(eventos));
+loadEventos();
+};
+
+e.appendChild(del);
+}
+
+});
+};
+}
+
+/* ========= SONS ========= */
+function sistemaSom(){
+
+const hoverSound = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_115b9bde5d.mp3");
+
+document.querySelectorAll("button").forEach(b=>{
+b.addEventListener("mouseenter",()=>{
+hoverSound.currentTime=0;
+hoverSound.play();
+});
+});
+}
+
+/* ========= HOOK FINAL ========= */
+const oldLoadUserPATCH = loadUser;
+
+loadUser = function(){
+oldLoadUserPATCH();
+
+setTimeout(()=>{
+melhorarContatos();
+melhorarLogin();
+sistemaMaterias();
+melhorarEventos();
+melhorarGrafico();
+sistemaSom();
+},100);
+};
+
+/* =========================================
+AFE PATCH 3.5 - REFINADO E ESTÁVEL
+========================================= */
+
+/* ========= CONTATOS (BLOQUEAR / DESBLOQUEAR LIMPO) ========= */
+function setupContatosV2(){
+
+if(!document.getElementById("contatos")) return;
+
+if(!document.getElementById("bloqueados")){
+let div = document.createElement("div");
+div.innerHTML="<h4>Bloqueados</h4><div id='bloqueados'></div>";
+contatos.parentNode.appendChild(div);
+}
+
+window.addContato = function(nome="",numero=""){
+let div = document.createElement("div");
+div.className="contatoItem";
+div.innerHTML=`
+<input value="${nome}" placeholder="Nome">
+<input value="${numero}" placeholder="Número">
+<button class="btnBlock">Bloquear</button>
+<button class="miniX">x</button>
+`;
+
+div.querySelector(".miniX").onclick=()=>div.remove();
+
+div.querySelector(".btnBlock").onclick=()=>{
+bloquearContatoV2(div);
+};
+
+contatos.appendChild(div);
+}
+
+function bloquearContatoV2(el){
+el.style.opacity="0.4";
+
+let btn = el.querySelector(".btnBlock");
+btn.innerText="Desbloquear";
+
+btn.onclick=()=>desbloquearContatoV2(el);
+
+bloqueados.appendChild(el);
+}
+
+function desbloquearContatoV2(el){
+el.style.opacity="1";
+
+let btn = el.querySelector(".btnBlock");
+btn.innerText="Bloquear";
+
+btn.onclick=()=>bloquearContatoV2(el);
+
+contatos.appendChild(el);
+}
+}
+
+/* ========= DRAG INVENTÁRIO (SEGURO) ========= */
+function setupDragDropV2(){
+
+document.querySelectorAll("#invLista > div").forEach(item=>{
+item.draggable = true;
+
+item.ondragstart = e=>{
+e.dataTransfer.setData("text/plain", item.outerHTML);
+setTimeout(()=>{ item.remove(); updateCarga(); },0);
+};
+});
+
+armarioLista.ondragover = e=>e.preventDefault();
+
+armarioLista.ondrop = e=>{
+e.preventDefault();
+
+let html = e.dataTransfer.getData("text/plain");
+let temp = document.createElement("div");
+temp.innerHTML = html;
+
+let novo = temp.firstChild;
+novo.draggable = false;
+
+armarioLista.appendChild(novo);
+};
+}
+
+/* ========= STATUS REAL (SEM QUEBRAR INPUTS) ========= */
+function melhorarStatusV2(){
+
+let card = document.querySelector("#status .card");
+if(!card || card.dataset.v2) return;
+
+card.dataset.v2 = true;
+
+let wrapper = document.createElement("div");
+wrapper.style.display="flex";
+wrapper.style.gap="20px";
+
+let fotoBox = document.createElement("div");
+fotoBox.innerHTML=`
+<img id="fotoAluno" style="width:120px;height:120px;border-radius:15px;border:2px solid gold;object-fit:cover">
+<input type="file" id="fotoInput">
+`;
+
+wrapper.appendChild(fotoBox);
+
+let dados = document.createElement("div");
+dados.style.flex="1";
+
+/* move tudo existente pra dentro */
+while(card.firstChild){
+dados.appendChild(card.firstChild);
+}
+
+wrapper.appendChild(dados);
+card.appendChild(wrapper);
+
+/* upload */
+document.getElementById("fotoInput").onchange = function(e){
+let file = e.target.files[0];
+if(!file) return;
+
+let reader = new FileReader();
+reader.onload = ev=>{
+fotoAluno.src = ev.target.result;
+localStorage.setItem("foto_"+viewingUser, ev.target.result);
+};
+reader.readAsDataURL(file);
+};
+
+/* load */
+let f = localStorage.getItem("foto_"+viewingUser);
+if(f) fotoAluno.src = f;
+}
+
+/* ========= MATÉRIAS FLUIDAS ========= */
+function sistemaMateriasV2(){
+
+if(!document.getElementById("materiasOpt")) return;
+
+materiasOpt.innerHTML="";
+
+let inscritas = document.createElement("div");
+inscritas.id="listaInscritas";
+
+let toggle = document.createElement("button");
+toggle.innerText="Inscrever-se em mais matérias";
+
+let opcoes = document.createElement("div");
+opcoes.style.display="none";
+
+const lista=[
+"Artes","Alemão","Árabe","Atualidades","Espanhol",
+"Estratégia","Francês","Inglês","Italiano","Japonês",
+"Mandarim","Negócios","Russo","Saúde","Tecnologia"
+];
+
+lista.forEach(m=>{
+let b=document.createElement("button");
+b.innerText=m;
+
+b.onclick=()=>{
+let item=document.createElement("div");
+item.className="materiaItem";
+item.innerHTML=`
+${m}
+<button class="miniX">x</button>
+`;
+
+item.querySelector(".miniX").onclick=()=>item.remove();
+
+inscritas.appendChild(item);
+};
+
+opcoes.appendChild(b);
+});
+
+toggle.onclick=()=>{
+opcoes.style.display = opcoes.style.display==="none"?"block":"none";
+};
+
+materiasOpt.appendChild(inscritas);
+materiasOpt.appendChild(toggle);
+materiasOpt.appendChild(opcoes);
+}
+
+/* ========= EVENTOS CORRIGIDOS ========= */
+function eventosV2(){
+
+const base = loadEventos;
+
+loadEventos = function(){
+base();
+
+let eventos = JSON.parse(localStorage.getItem("eventos")||"[]");
+
+document.querySelectorAll(".event").forEach((el,index)=>{
+
+/* lido */
+let lido=document.createElement("button");
+lido.className="miniX";
+lido.innerText="✓";
+
+lido.onclick=()=>{
+el.style.opacity="0.4";
+listaEventos.appendChild(el);
+};
+
+el.appendChild(lido);
+
+/* delete seguro */
+if(currentUser==="diretoria"){
+let del=document.createElement("button");
+del.className="miniX";
+del.innerText="x";
+
+del.onclick=()=>{
+eventos.splice(index,1);
+localStorage.setItem("eventos",JSON.stringify(eventos));
+loadEventos();
+};
+
+el.appendChild(del);
+}
+
+});
+};
+}
+
+/* ========= LOGIN FIX ========= */
+function fixLoginV2(){
+let btn=document.querySelector(".login-box button");
+if(btn){
+btn.style.display="block";
+btn.style.margin="20px auto 0";
+}
+}
+
+/* ========= CSS EXTRA ========= */
+const styleV2=document.createElement("style");
+styleV2.innerHTML=`
+.contatoItem{
+display:flex;
+gap:5px;
+margin-bottom:5px;
+}
+.materiaItem{
+display:flex;
+justify-content:space-between;
+background:rgba(255,255,255,0.05);
+padding:5px;
+margin:3px 0;
+border-radius:6px;
+}
+.btnBlock{
+font-size:11px;
+}
+`;
+document.head.appendChild(styleV2);
+
+/* ========= HOOK FINAL LIMPO ========= */
+const loadUserOLD = loadUser;
+
+loadUser = function(){
+loadUserOLD();
+
+setTimeout(()=>{
+setupContatosV2();
+setupDragDropV2();
+melhorarStatusV2();
+sistemaMateriasV2();
+eventosV2();
+fixLoginV2();
+},120);
+};
+
+/* =========================================
+AFE PATCH FINAL - CORREÇÕES VISUAIS E FUNCIONAIS
+========================================= */
+
+/* ========= GRAFICO CORRIGIDO ========= */
+function fixGrafico(){
+
+const oldAnimate = animateGraph;
+
+animateGraph = function(){
+
+oldAnimate();
+
+let ctx = grafico.getContext("2d");
+
+/* grade */
+for(let r=40;r<=200;r+=40){
+ctx.beginPath();
+ctx.strokeStyle="rgba(212,175,55,0.15)";
+ctx.arc(250,250,r,0,Math.PI*2);
+ctx.stroke();
+}
+
+/* limite */
+ctx.beginPath();
+ctx.strokeStyle="gold";
+ctx.lineWidth=2;
+
+for(let i=0;i<5;i++){
+let ang=(Math.PI*2/5)*i - Math.PI/2;
+let x=250+Math.cos(ang)*100;
+let y=250+Math.sin(ang)*100;
+
+if(i===0) ctx.moveTo(x,y);
+else ctx.lineTo(x,y);
+}
+
+ctx.closePath();
+ctx.stroke();
+
+};
+}
+
+/* ========= FOCO CORRIGIDO ========= */
+function fixFoco(){
+
+const oldUpdate = updateFoco;
+
+updateFoco = function(){
+
+oldUpdate();
+
+let atual = +focoAtual.value || 0;
+let max = +focoMax.value || 1;
+
+let percent = Math.min((atual/max)*100,100);
+
+focoFill.style.width = percent + "%";
+
+/* cor dinâmica */
+if(percent < 30){
+focoFill.style.background="linear-gradient(90deg,#8b0000,#ff0000)";
+}else{
+focoFill.style.background="linear-gradient(90deg,#d4af37,#ffd700)";
+}
+
+};
+}
+
+/* ========= FOTO MAIS BONITA ========= */
+function melhorarFoto(){
+
+let img = document.getElementById("fotoAluno");
+if(!img) return;
+
+img.style.borderRadius="50%";
+img.style.boxShadow="0 0 20px rgba(212,175,55,0.5)";
+img.style.border="2px solid gold";
+img.style.transition="0.3s";
+
+img.onmouseenter=()=>{
+img.style.transform="scale(1.05)";
+};
+img.onmouseleave=()=>{
+img.style.transform="scale(1)";
+};
+
+}
+
+/* ========= MATÉRIAS MAIS BONITAS ========= */
+function melhorarMateriasUI(){
+
+let lista = document.getElementById("listaInscritas");
+if(!lista) return;
+
+lista.style.display="flex";
+lista.style.flexDirection="column";
+lista.style.gap="5px";
+
+lista.querySelectorAll(".materiaItem").forEach(el=>{
+el.style.background="rgba(212,175,55,0.1)";
+el.style.border="1px solid rgba(212,175,55,0.3)";
+el.style.padding="6px 10px";
+el.style.borderRadius="8px";
+});
+}
+
+/* ========= CONTATOS SEM NÚMERO ========= */
+function removerNumeroContatos(){
+
+document.querySelectorAll(".contatoItem").forEach(el=>{
+
+let inputs = el.querySelectorAll("input");
+
+/* mantém só o primeiro (nome) */
+inputs.forEach((inp,i)=>{
+if(i===1) inp.remove();
+});
+
+});
+}
+
+/* ========= EVENTOS COM EXCLUIR ========= */
+function eventosDeleteFix(){
+
+const base = loadEventos;
+
+loadEventos = function(){
+
+base();
+
+let eventos = JSON.parse(localStorage.getItem("eventos")||"[]");
+
+document.querySelectorAll(".event").forEach((el,index)=>{
+
+/* evitar duplicação */
+if(el.dataset.fixed) return;
+el.dataset.fixed = true;
+
+/* botão excluir */
+let del = document.createElement("button");
+del.className="miniX";
+del.innerText="x";
+
+del.onclick=()=>{
+eventos.splice(index,1);
+localStorage.setItem("eventos",JSON.stringify(eventos));
+loadEventos();
+};
+
+el.appendChild(del);
+
+});
+};
+}
+
+/* ========= HOOK FINAL ========= */
+const loadUserFINAL = loadUser;
+
+loadUser = function(){
+loadUserFINAL();
+
+setTimeout(()=>{
+fixGrafico();
+fixFoco();
+melhorarFoto();
+melhorarMateriasUI();
+removerNumeroContatos();
+eventosDeleteFix();
+
+/* força atualização */
+animateGraph();
+updateFoco();
+
+},150);
+};
+
+/* =========================
+PATCH ESTÁVEL FINAL (SEM QUEBRAR LOGIN)
+========================= */
+
+/* ========= GRAFICO FIX ========= */
+function updateGraficoSafe(){
+
+if(!window.grafico) return;
+
+let ctx = grafico.getContext("2d");
+ctx.clearRect(0,0,500,500);
+
+let vals = [
+Math.max(1, +coord.value || 1),
+Math.max(1, +fisico.value || 1),
+Math.max(1, +infl.value || 1),
+Math.max(1, +inte.value || 1),
+Math.max(1, +perc.value || 1)
+];
+
+/* grade */
+for(let r=40;r<=200;r+=40){
+ctx.beginPath();
+ctx.strokeStyle="rgba(212,175,55,0.1)";
+ctx.arc(250,250,r,0,Math.PI*2);
+ctx.stroke();
+}
+
+/* limite 5 */
+ctx.beginPath();
+ctx.strokeStyle="rgba(212,175,55,0.4)";
+ctx.lineWidth=2;
+
+for(let i=0;i<5;i++){
+let ang=(Math.PI*2/5)*i - Math.PI/2;
+let x=250+Math.cos(ang)*100;
+let y=250+Math.sin(ang)*100;
+
+if(i===0) ctx.moveTo(x,y);
+else ctx.lineTo(x,y);
+}
+ctx.closePath();
+ctx.stroke();
+
+/* player */
+ctx.beginPath();
+ctx.fillStyle="rgba(212,175,55,0.6)";
+
+for(let i=0;i<5;i++){
+let ang=(Math.PI*2/5)*i - Math.PI/2;
+let r=(vals[i]*20);
+
+let x=250+Math.cos(ang)*r;
+let y=250+Math.sin(ang)*r;
+
+if(i===0) ctx.moveTo(x,y);
+else ctx.lineTo(x,y);
+}
+
+ctx.closePath();
+ctx.fill();
+}
+
+/* ========= FOCO FIX ========= */
+function updateFocoSafe(){
+
+if(!window.focoFill) return;
+
+let atual = +focoAtual.value || 0;
+let max = +focoMax.value || 1;
+
+let percent = Math.max(0, Math.min(100, (atual/max)*100));
+focoFill.style.width = percent + "%";
+
+if(percent < 30){
+focoFill.style.background="linear-gradient(90deg,#8b0000,#ff0000)";
+}else if(percent < 60){
+focoFill.style.background="linear-gradient(90deg,#b8860b,#ffd700)";
+}else{
+focoFill.style.background="linear-gradient(90deg,#d4af37,#ffd700)";
+}
+}
+
+/* ========= CONTATOS SEM NUMERO ========= */
+function limparContatosNumero(){
+
+if(!window.contatos) return;
+
+document.querySelectorAll(".contatoItem").forEach(el=>{
+let inputs = el.querySelectorAll("input");
+
+if(inputs.length > 1){
+inputs[1].remove(); // remove campo número
+}
+});
+}
+
+/* ========= EVENTOS UX ========= */
+function melhorarEventosSafe(){
+
+document.querySelectorAll(".event").forEach((el,index)=>{
+
+if(el.dataset.patchado) return;
+el.dataset.patchado = true;
+
+/* lido */
+let lido = document.createElement("span");
+lido.innerText="✓";
+lido.style.fontSize="10px";
+lido.style.marginLeft="8px";
+lido.style.cursor="pointer";
+lido.style.opacity="0.5";
+
+lido.onclick=()=>{
+el.style.opacity="0.3";
+listaEventos.appendChild(el);
+};
+
+el.appendChild(lido);
+
+/* deletar */
+if(window.currentUser==="diretoria"){
+let del=document.createElement("span");
+del.innerText="✕";
+del.style.fontSize="10px";
+del.style.marginLeft="8px";
+del.style.cursor="pointer";
+del.style.opacity="0.5";
+
+del.onclick=()=>{
+let eventos=JSON.parse(localStorage.getItem("eventos")||"[]");
+eventos.splice(index,1);
+localStorage.setItem("eventos",JSON.stringify(eventos));
+loadEventos();
+};
+
+el.appendChild(del);
+}
+
+});
+}
+
+/* ========= MATERIAS VISUAL ========= */
+function melhorarMateriasSafe(){
+
+document.querySelectorAll(".materiaItem").forEach(el=>{
+el.style.background="rgba(212,175,55,0.1)";
+el.style.border="1px solid rgba(212,175,55,0.2)";
+el.style.padding="6px 10px";
+el.style.borderRadius="8px";
+});
+}
+
+/* ========= LOOP SEGURO ========= */
+setInterval(()=>{
+
+if(document.getElementById("app")?.style.display === "none") return;
+
+/* roda só quando logado */
+updateGraficoSafe();
+updateFocoSafe();
+limparContatosNumero();
+melhorarEventosSafe();
+melhorarMateriasSafe();
+
+},500);
+
+/* =========================================
+AFE PATCH UI 2.0 - CONTROLES + ANIMAÇÕES
+========================================= */
+
+/* ========= BOTÕES PEQUENOS PADRÃO ========= */
+(function(){
+const style = document.createElement("style");
+style.innerHTML = `
+.miniBtn{
+font-size:10px;
+padding:2px 5px;
+width:auto;
+border-radius:6px;
+background:rgba(212,175,55,0.15);
+color:#d4af37;
+border:1px solid rgba(212,175,55,0.3);
+cursor:pointer;
+transition:0.2s;
+}
+.miniBtn:hover{
+background:#d4af37;
+color:black;
+}
+`;
+document.head.appendChild(style);
+})();
+
+/* ========= EVITA DUPLICAÇÃO ========= */
+function safeAppend(parent, selector, element){
+if(!parent.querySelector(selector)){
+parent.appendChild(element);
+}
+}
+
+/* =========================================
+CONTATOS - BOTÃO APAGAR (SEM DUPLICAR)
+========================================= */
+function patchContatosDelete(){
+
+document.querySelectorAll(".contatoItem").forEach(contato=>{
+
+if(!contato.querySelector(".deleteContato")){
+
+let btn = document.createElement("button");
+btn.innerText="x";
+btn.className="miniBtn deleteContato";
+
+btn.onclick=()=>contato.remove();
+
+contato.appendChild(btn);
+}
+
+});
+}
+
+/* =========================================
+INVENTÁRIO - CONTROLES
+========================================= */
+
+function patchInventarioControls(){
+
+/* ===== INVENTÁRIO ATIVO ===== */
+document.querySelectorAll("#invLista > div").forEach(item=>{
+
+/* deletar */
+if(!item.querySelector(".delItem")){
+let del = document.createElement("button");
+del.innerText="x";
+del.className="miniBtn delItem";
+
+del.onclick=()=>{
+item.remove();
+updateCarga();
+};
+
+item.appendChild(del);
+}
+
+/* guardar */
+if(!item.querySelector(".guardarItem")){
+let guardar = document.createElement("button");
+guardar.innerText="⇅";
+guardar.className="miniBtn guardarItem";
+
+guardar.onclick=()=>{
+armarioLista.appendChild(item);
+updateCarga();
+};
+
+item.appendChild(guardar);
+}
+
+});
+
+/* ===== ARMÁRIO ===== */
+document.querySelectorAll("#armarioLista > div").forEach(item=>{
+
+/* deletar */
+if(!item.querySelector(".delArmario")){
+let del = document.createElement("button");
+del.innerText="x";
+del.className="miniBtn delArmario";
+
+del.onclick=()=>item.remove();
+
+item.appendChild(del);
+}
+
+/* mover pro inventário */
+if(!item.querySelector(".moverInv")){
+let move = document.createElement("button");
+move.innerText="↑";
+move.className="miniBtn moverInv";
+
+move.onclick=()=>{
+invLista.appendChild(item);
+updateCarga();
+};
+
+item.appendChild(move);
+}
+
+});
+
+}
+
+/* =========================================
+EVENTOS - DELETE + LIDO DISCRETO
+========================================= */
+
+function patchEventosControls(){
+
+let eventos = JSON.parse(localStorage.getItem("eventos")||"[]");
+
+document.querySelectorAll(".event").forEach((el,index)=>{
+
+/* evitar duplicação */
+if(el.dataset.patched) return;
+el.dataset.patched = true;
+
+/* botão lido */
+let lido = document.createElement("button");
+lido.innerText="✓";
+lido.className="miniBtn";
+
+lido.onclick=()=>{
+el.style.opacity="0.4";
+listaEventos.appendChild(el);
+};
+
+/* botão deletar (diretoria) */
+if(currentUser==="diretoria"){
+let del = document.createElement("button");
+del.innerText="x";
+del.className="miniBtn";
+
+del.onclick=()=>{
+eventos.splice(index,1);
+localStorage.setItem("eventos",JSON.stringify(eventos));
+loadEventos();
+};
+
+el.appendChild(del);
+}
+
+el.appendChild(lido);
+
+});
+
+}
+
+/* =========================================
+GRÁFICO - ANIMAÇÃO CORRIGIDA
+========================================= */
+
+let graphAnimFrame;
+
+function animateGraphSmooth(){
+
+cancelAnimationFrame(graphAnimFrame);
+
+let ctx = grafico.getContext("2d");
+
+let vals = [
++coord.value||1,
++fisico.value||1,
++infl.value||1,
++inte.value||1,
++perc.value||1
+];
+
+let target = vals.map(v=>Math.max(1,Math.min(v,6)));
+let current = [0,0,0,0,0];
+
+function draw(){
+
+ctx.clearRect(0,0,500,500);
+
+/* grid */
+for(let r=40;r<=200;r+=40){
+ctx.beginPath();
+ctx.strokeStyle="rgba(212,175,55,0.15)";
+ctx.arc(250,250,r,0,Math.PI*2);
+ctx.stroke();
+}
+
+/* animação */
+let done = true;
+
+ctx.beginPath();
+
+for(let i=0;i<5;i++){
+
+current[i] += (target[i]-current[i])*0.15;
+
+if(Math.abs(current[i]-target[i])>0.01) done=false;
+
+let ang=(Math.PI*2/5)*i - Math.PI/2;
+let r=current[i]*35;
+
+let x=250+Math.cos(ang)*r;
+let y=250+Math.sin(ang)*r;
+
+if(i===0) ctx.moveTo(x,y);
+else ctx.lineTo(x,y);
+}
+
+ctx.closePath();
+ctx.fillStyle="rgba(212,175,55,0.6)";
+ctx.fill();
+
+if(!done){
+graphAnimFrame = requestAnimationFrame(draw);
+}
+
+}
+
+draw();
+}
+
+/* =========================================
+FOCO - ANIMAÇÃO SUAVE
+========================================= */
+
+function animateFoco(){
+
+let atual = +focoAtual.value||0;
+let max = +focoMax.value||1;
+
+let percent = Math.min((atual/max)*100,100);
+
+focoFill.style.transition="width 0.4s ease";
+focoFill.style.width = percent+"%";
+
+if(percent<30){
+focoFill.classList.add("low");
+}else{
+focoFill.classList.remove("low");
+}
+
+}
+
+/* =========================================
+HOOK GLOBAL SEGURO
+========================================= */
+
+document.addEventListener("input", ()=>{
+animateGraphSmooth();
+animateFoco();
+setTimeout(()=>{
+patchContatosDelete();
+patchInventarioControls();
+},50);
+});
+
+/* ao carregar */
+const oldLoadUserFINAL = loadUser;
+
+loadUser = function(){
+oldLoadUserFINAL();
+
+setTimeout(()=>{
+animateGraphSmooth();
+animateFoco();
+patchContatosDelete();
+patchInventarioControls();
+patchEventosControls();
+},120);
+};
+
+/* =========================================
+AFE PATCH REWORK - SOCIAL + INVENTÁRIO + STATUS
+========================================= */
+
+/* ========= REMOVER EVENTOS COMPLETAMENTE ========= */
+function removeEventosTotal(){
+let tab = [...document.querySelectorAll(".tab")].find(t=>t.innerText==="Eventos");
+if(tab) tab.remove();
+
+let content = document.getElementById("eventos");
+if(content) content.remove();
+}
+
+/* =========================================
+STATUS - PONTOS ESPECIAL
+========================================= */
+function patchStatusPontos(){
+
+let statusCard = document.querySelector("#status .card");
+if(!statusCard || statusCard.querySelector("#pontosStatus")) return;
+
+let div = document.createElement("div");
+
+div.innerHTML = `
+<h3>Pontos</h3>
+<input id="pontosStatus" type="number">
+`;
+
+statusCard.appendChild(div);
+
+/* inicializa */
+let data = JSON.parse(localStorage.getItem("afe_"+viewingUser)||"{}");
+
+if(data.pontos === undefined){
+data.pontos = 10000;
+localStorage.setItem("afe_"+viewingUser, JSON.stringify(data));
+}
+
+pontosStatus.value = data.pontos;
+
+/* sync com sistema */
+pontosStatus.addEventListener("input", ()=>{
+let d = JSON.parse(localStorage.getItem("afe_"+viewingUser)||"{}");
+d.pontos = +pontosStatus.value || 0;
+localStorage.setItem("afe_"+viewingUser, JSON.stringify(d));
+});
+}
+
+/* =========================================
+SOCIAL REWORK (SÓ CONTATOS LIMPOS)
+========================================= */
+function patchSocialNovo(){
+
+let social = document.getElementById("social");
+if(!social || social.dataset.reworked) return;
+
+social.dataset.reworked = true;
+
+social.innerHTML = `
+<div class="card">
+<h3>Contatos</h3>
+
+<div id="contatosLista"></div>
+
+<button onclick="addContatoNovo()">+ Contato</button>
+
+<h4 style="margin-top:15px;">Bloqueados</h4>
+<div id="contatosBloqueados"></div>
+</div>
+`;
+
+window.addContatoNovo = function(nome=""){
+
+let div = document.createElement("div");
+div.className="contatoItem";
+div.innerHTML=`
+<input value="${nome}" placeholder="Nome do contato">
+<button class="miniBtn btnBlock">Bloquear</button>
+<button class="miniBtn">x</button>
+`;
+
+let btnBlock = div.querySelector(".btnBlock");
+let btnDel = div.querySelectorAll("button")[1];
+
+btnDel.onclick = ()=>div.remove();
+
+btnBlock.onclick = ()=>{
+if(div.parentNode.id==="contatosLista"){
+div.style.opacity="0.4";
+contatosBloqueados.appendChild(div);
+btnBlock.innerText="Desbloquear";
+}else{
+div.style.opacity="1";
+contatosLista.appendChild(div);
+btnBlock.innerText="Bloquear";
+}
+};
+
+contatosLista.appendChild(div);
+};
+
+}
+
+/* =========================================
+INVENTÁRIO REWORK TOTAL
+========================================= */
+function patchInventarioNovo(){
+
+/* remove aba antiga se existir */
+let old = document.getElementById("inventario");
+if(old) old.remove();
+
+/* remove tab antiga */
+document.querySelectorAll(".tab").forEach(t=>{
+if(t.innerText==="Inventário") t.remove();
+});
+
+/* cria nova tab */
+let tab = document.createElement("div");
+tab.className="tab";
+tab.innerText="Inventário";
+tab.onclick=()=>openTab("inventarioNovo");
+
+document.querySelector(".tabs").appendChild(tab);
+
+/* cria conteúdo */
+let div = document.createElement("div");
+div.id="inventarioNovo";
+div.className="tabContent";
+div.style.display="none";
+
+div.innerHTML=`
+<div class="card">
+<h3>Inventário Ativo</h3>
+
+Carga Máxima <input id="cargaMaxNova" type="number" value="5">
+
+<div id="listaInvNovo"></div>
+
+<button onclick="addItemNovo()">+ Item</button>
+
+<div style="margin-top:10px">
+Carga: <span id="pesoAtualNovo">0 / 5</span>
+</div>
+</div>
+
+<div class="card">
+<h3>Armário</h3>
+
+<div id="listaArmarioNovo"></div>
+</div>
+`;
+
+document.querySelector(".container").appendChild(div);
+
+/* funções */
+window.addItemNovo = function(nome="",peso=""){
+
+let item = document.createElement("div");
+item.style.display="flex";
+item.style.gap="5px";
+item.style.marginBottom="5px";
+
+item.innerHTML=`
+<input type="number" value="${peso}" placeholder="Kg" style="width:60px">
+<input value="${nome}" placeholder="Item" style="flex:1">
+<button class="miniBtn">⇅</button>
+<button class="miniBtn">x</button>
+`;
+
+let btnMove = item.children[2];
+let btnDel = item.children[3];
+
+btnDel.onclick=()=>{
+item.remove();
+updatePesoNovo();
+};
+
+btnMove.onclick=()=>{
+listaArmarioNovo.appendChild(item);
+updatePesoNovo();
+};
+
+listaInvNovo.appendChild(item);
+updatePesoNovo();
+};
+
+function updatePesoNovo(){
+
+let total=0;
+
+document.querySelectorAll("#listaInvNovo input[type='number']").forEach(i=>{
+total += (+i.value||0);
+});
+
+let max = +cargaMaxNova.value||5;
+
+pesoAtualNovo.innerText = total+" / "+max;
+
+pesoAtualNovo.style.color = total>max ? "red" : "#d4af37";
+}
+
+/* armário interação */
+listaArmarioNovo.addEventListener("click", e=>{
+if(e.target.classList.contains("miniBtn")){
+
+let item = e.target.parentNode;
+
+/* voltar pro inventário */
+listaInvNovo.appendChild(item);
+updatePesoNovo();
+
+}
+});
+
+/* atualizar peso */
+document.addEventListener("input", e=>{
+if(e.target.closest("#listaInvNovo")){
+updatePesoNovo();
+}
+});
+
+}
+
+/* =========================================
+HOOK FINAL SEGURO
+========================================= */
+const oldLoadUserREWORK = loadUser;
+
+loadUser = function(){
+oldLoadUserREWORK();
+
+setTimeout(()=>{
+removeEventosTotal();
+patchStatusPontos();
+patchSocialNovo();
+patchInventarioNovo();
+},120);
+};
+
+/* =========================================
+FIX CONTATOS - REMOVE BOTÃO DUPLICADO
+========================================= */
+
+function fixDuplicacaoContatos(){
+
+document.querySelectorAll(".contatoItem").forEach(contato=>{
+
+let botoes = contato.querySelectorAll("button");
+
+/* mantém só os dois primeiros (bloquear + excluir) */
+if(botoes.length > 2){
+
+botoes.forEach((btn, index)=>{
+if(index > 1){
+btn.remove();
+}
+});
+
+}
+
+/* garante que só existe 1 botão de excluir */
+let deletes = [...contato.querySelectorAll("button")]
+.filter(b=>b.innerText==="x");
+
+if(deletes.length > 1){
+deletes.forEach((b,i)=>{
+if(i>0) b.remove();
+});
+}
+
+});
+
+}
+
+/* roda sempre que algo muda */
+document.addEventListener("input", ()=>{
+setTimeout(fixDuplicacaoContatos, 50);
+});
+
+/* roda ao carregar */
+const oldLoadUser_FIXCONTATO = loadUser;
+
+loadUser = function(){
+oldLoadUser_FIXCONTATO();
+
+setTimeout(()=>{
+fixDuplicacaoContatos();
+},150);
+};
 </script>
 
 </body>
